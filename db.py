@@ -432,21 +432,16 @@ def exportar_acompanhamento_para_excel(referencia_mes=None, caminho_saida=None):
 
 def exportar_acompanhamento_mensal_automatico():
     """
-    Exporta acompanhamento do mês atual para Excel automaticamente.
-    Útil para ser chamado pelo agendador (Task Scheduler).
+    Exporta acompanhamento do mes atual para Excel automaticamente.
+    Util para ser chamado pelo agendador (Task Scheduler).
     
     Returns:
-        Tupla: (caminho_arquivo, mes_referencia, quantidade_registros)
+        str: Caminho do arquivo gerado ou None se falhar
     """
     ref = f"{datetime.now().year:04d}-{datetime.now().month:02d}"
     caminho = exportar_acompanhamento_para_excel(referencia_mes=ref)
     
     if caminho:
-        conn = get_connection()
-        cursor = conn.cursor()
-        cursor.execute('SELECT COUNT(*) FROM acompanhamento WHERE referencia_mes = ?', (ref,))
-        count = cursor.fetchone()[0]
-        conn.close()
-        return caminho, ref, count
+        return caminho
     
     return None, ref, 0
