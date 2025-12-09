@@ -35,6 +35,80 @@ Sistema desktop para gestão de editais de bolsas de estudo (CAPES, CNPq, Funda�
 
 > 💡 **Dica**: Mantenha o `.exe` e o `.db` na mesma pasta para preservar os dados.
 
+## 🚀 Acompanhamento Mensal de Bolsas (Novo - v3)
+
+### Aba Acompanhamento
+
+Desde a v3, a aplicação inclui uma aba dedicada para **acompanhamento mensal** de requisições de pagamento:
+
+1. Abra a aba **"Acompanhamento"**.
+2. Selecione um bolsista ativo.
+3. O sistema calcula automaticamente:
+   - **Parcela Atual**: número do mês (baseado em data de início da bolsa).
+   - **Data de Fim Bolsa**: quando a bolsa termina.
+4. Preencha:
+   - **Nº Requisição**: número do pagamento (SEI, fatura, etc.).
+   - **Observações**: anotações adicionais (opcional).
+5. Clique **"Registrar requisição"** para salvar.
+
+Ao reabrir o bolsista, os dados preenchidos são carregados automaticamente.
+
+### Automação: Pré-preenchimento Mensal
+
+Para pré-criar registros de acompanhamento mensalmente **sem abrir a UI**:
+
+#### Executar Manualmente
+```powershell
+python prefill_acompanhamento.py
+```
+
+#### Agendar no Windows Task Scheduler
+
+1. Abra **Agendador de Tarefas** (`Win + R` → `taskschd.msc`).
+2. Clique **"Criar Tarefa"** (no painel direito).
+3. Configure conforme abaixo:
+
+   **Aba Geral:**
+   - Nome: `Gestão de Editais - Prefill Mensal`
+   - Marque `Executar com privilégios mais altos`
+
+   **Aba Gatilhos:**
+   - Clique "Novo" → Tipo: Mensal
+   - Dia: 1 (ou preferido)
+   - Hora: 09:00 (ou preferida)
+
+   **Aba Ações:**
+   - Programa: `C:\Users\higosantos\Documents\gestao_editais\.venv\Scripts\python.exe`
+   - Argumentos: `C:\Users\higosantos\Documents\gestao_editais\prefill_acompanhamento.py`
+   - Iniciar em: `C:\Users\higosantos\Documents\gestao_editais`
+
+#### Via PowerShell (alternativa)
+
+```powershell
+$Action = New-ScheduledTaskAction -Execute "C:\Users\higosantos\Documents\gestao_editais\.venv\Scripts\python.exe" `
+    -Argument "C:\Users\higosantos\Documents\gestao_editais\prefill_acompanhamento.py" `
+    -WorkingDirectory "C:\Users\higosantos\Documents\gestao_editais"
+
+$Trigger = New-ScheduledTaskTrigger -Monthly -At 09:00 -DaysOfMonth 1
+
+Register-ScheduledTask -TaskName "Gestão de Editais - Prefill Mensal" `
+    -Action $Action -Trigger $Trigger -Description "Pré-cria registros de acompanhamento" `
+    -RunLevel Highest
+```
+
+### Estrutura de Migrations
+
+- **criar_banco.py**: Schema inicial.
+- **atualizar_banco_v2.py**: Adiciona coluna `data_inicio_curso`.
+- **atualizar_banco_v3.py**: Cria tabela `acompanhamento`.
+
+Execute na ordem:
+```powershell
+python criar_banco.py
+python atualizar_banco_v2.py
+python atualizar_banco_v3.py
+```
+
 ## 💻 Para desenvolvedores
 
 ### Pré-requisitos

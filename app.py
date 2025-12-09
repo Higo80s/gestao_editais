@@ -15,6 +15,7 @@ from reportlab.lib.units import inch
 import openpyxl
 from openpyxl import Workbook
 from openpyxl.styles import Font, Alignment, PatternFill, Border, Side
+import db
 
 class GestaoEditaisApp:
     def __init__(self, root):
@@ -42,6 +43,7 @@ class GestaoEditaisApp:
         self.criar_formulario_modalidades()
         self.criar_formulario_bolsistas()
         self.criar_aba_consulta()
+        self.criar_aba_acompanhamento()
 
     def converter_data_br_para_iso(self, data_br):
         if not data_br:
@@ -118,20 +120,11 @@ class GestaoEditaisApp:
             return
 
         try:
-            conn = sqlite3.connect(self.db_path)
-            cursor = conn.cursor()
-            cursor.execute('''
-                INSERT INTO editais (numero_edital, descricao, agencia_fomento, codigo_projeto, descricao_projeto)
-                VALUES (?, ?, ?, ?, ?)
-            ''', (numero, descricao, agencia, cod_projeto, desc_projeto))
-            conn.commit()
-            conn.close()
-
+            db.criar_edital(numero, descricao, agencia, cod_projeto, desc_projeto)
             messagebox.showinfo("Sucesso", "Edital cadastrado com sucesso!")
             self.limpar_campos_edital()
             self.carregar_editais_para_combo()
-
-        except sqlite3.Error as e:
+        except Exception as e:
             messagebox.showerror("Erro de Banco de Dados", f"Erro ao salvar edital:\n{str(e)}")
 
     def limpar_campos_edital(self):
@@ -172,12 +165,7 @@ class GestaoEditaisApp:
 
     def carregar_editais_para_combo(self):
         try:
-            conn = sqlite3.connect(self.db_path)
-            cursor = conn.cursor()
-            cursor.execute("SELECT id, numero_edital FROM editais ORDER BY id")
-            editais = cursor.fetchall()
-            conn.close()
-
+            editais = db.obter_todos_editais()
             if editais:
                 self.combo_editais_mod['values'] = [f"{e[1]}" for e in editais]
                 self.combo_editais_mod.set("")
@@ -192,7 +180,7 @@ class GestaoEditaisApp:
                 if hasattr(self, 'combo_editais_bols'):
                     self.combo_editais_bols['values'] = ["Nenhum edital cadastrado"]
                     self.combo_editais_bols.set("Nenhum edital cadastrado")
-        except sqlite3.Error as e:
+        except Exception as e:
             messagebox.showerror("Erro", f"Erro ao carregar editais:\n{str(e)}")
 
     def cadastrar_modalidade(self):
@@ -219,26 +207,14 @@ class GestaoEditaisApp:
         vagas = int(vagas_str)
 
         try:
-            conn = sqlite3.connect(self.db_path)
-            cursor = conn.cursor()
-            cursor.execute("SELECT id FROM editais WHERE numero_edital = ?", (edital_selecionado,))
-            resultado = cursor.fetchone()
-            if not resultado:
+            edital_id = db.obter_edital_id_por_numero(edital_selecionado)
+            if not edital_id:
                 messagebox.showerror("Erro", "Edital não encontrado.")
                 return
-            edital_id = resultado[0]
-
-            cursor.execute('''
-                INSERT INTO modalidades (edital_id, nivel, vagas, valor_mensal)
-                VALUES (?, ?, ?, ?)
-            ''', (edital_id, nivel, vagas, valor))
-            conn.commit()
-            conn.close()
-
+            db.criar_modalidade(edital_id, nivel, vagas, valor)
             messagebox.showinfo("Sucesso", "Modalidade cadastrada com sucesso!")
             self.limpar_campos_modalidade()
-
-        except sqlite3.Error as e:
+        except Exception as e:
             messagebox.showerror("Erro de Banco de Dados", f"Erro ao salvar modalidade:\n{str(e)}")
 
     def limpar_campos_modalidade(self):
@@ -415,33 +391,16 @@ class GestaoEditaisApp:
             return
 
         try:
-            conn = sqlite3.connect(self.db_path)
-            cursor = conn.cursor()
-            cursor.execute("SELECT id FROM editais WHERE numero_edital = ?", (edital,))
-            resultado = cursor.fetchone()
-            if not resultado:
+            edital_id = db.obter_edital_id_por_numero(edital)
+            if not edital_id:
                 messagebox.showerror("Erro", "Edital não encontrado.")
                 return
-            edital_id = resultado[0]
-
-            cursor.execute('''
-                INSERT INTO bolsistas (
-                    edital_id, processo_sei, nome, cpf, orientador, campus, programa,
-                    nivel, data_inicio_curso, data_inicio_bolsa, meses_duracao, data_fim_bolsa,
-                    previsao_defesa, email_bolsista, email_programa, status
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ''', (
-                edital_id, processo, nome, cpf, orientador, campus, programa,
-                nivel, data_inicio_curso_iso, data_inicio_bolsa_iso, meses, data_fim_iso,
-                defesa_iso, email_bols, email_prog, 'ativo'
-            ))
-            conn.commit()
-            conn.close()
-
+            db.criar_bolsista(edital_id, processo, nome, cpf, orientador, campus, programa,
+                             nivel, data_inicio_curso_iso, data_inicio_bolsa_iso, meses, data_fim_iso,
+                             defesa_iso, email_bols, email_prog)
             messagebox.showinfo("Sucesso", "Bolsista cadastrado com sucesso!")
             self.limpar_campos_bolsista()
-
-        except sqlite3.Error as e:
+        except Exception as e:
             messagebox.showerror("Erro de Banco de Dados", f"Erro ao salvar bolsista:\n{str(e)}")
 
     def limpar_campos_bolsista(self):
@@ -667,6 +626,234 @@ class GestaoEditaisApp:
             self.carregar_dados_consulta()
         except sqlite3.Error as e:
             messagebox.showerror("Erro", f"Erro ao carregar editais para consulta:\n{str(e)}")
+
+    # === ABA: ACOMPANHAMENTO ===
+    def criar_aba_acompanhamento(self):
+        self.tab_acomp = ttk.Frame(self.notebook)
+        self.notebook.add(self.tab_acomp, text="Acompanhamento")
+
+        top_frame = ttk.Frame(self.tab_acomp)
+        top_frame.pack(fill='x', padx=10, pady=6)
+
+        ttk.Label(top_frame, text="Filtro Edital (opcional):").pack(side='left')
+        self.combo_acomp_editais = ttk.Combobox(top_frame, width=30, state="readonly")
+        self.combo_acomp_editais.pack(side='left', padx=5)
+        ttk.Button(top_frame, text="Atualizar", command=self.carregar_acompanhamento_lista).pack(side='left', padx=5)
+
+        # Treeview com bolsistas ativos
+        cols = ("ID", "Nome", "Nível", "Início Bolsa", "Parcela Atual", "Meses", "Fim Bolsa")
+        self.tree_acomp = ttk.Treeview(self.tab_acomp, columns=cols, show='headings')
+        for col in cols:
+            self.tree_acomp.heading(col, text=col)
+            if col == "ID": self.tree_acomp.column(col, width=50)
+            elif col == "Nome": self.tree_acomp.column(col, width=200)
+            else: self.tree_acomp.column(col, width=110)
+
+        scrollbar = ttk.Scrollbar(self.tab_acomp, orient="vertical", command=self.tree_acomp.yview)
+        self.tree_acomp.configure(yscroll=scrollbar.set)
+        self.tree_acomp.pack(side='left', fill='both', expand=True, padx=(10,0), pady=10)
+        scrollbar.pack(side='right', fill='y', pady=10)
+
+        self.tree_acomp.bind("<<TreeviewSelect>>", self.mostrar_detalhes_acompanhamento)
+
+        # Painel de detalhes / registro
+        detalhe_frame = ttk.Frame(self.tab_acomp)
+        detalhe_frame.pack(fill='x', padx=10, pady=(0,10))
+
+        ttk.Label(detalhe_frame, text="Bolsista Selecionado:").grid(row=0, column=0, sticky='w')
+        self.lbl_bolsista_sel = ttk.Label(detalhe_frame, text="Nenhum")
+        self.lbl_bolsista_sel.grid(row=0, column=1, sticky='w')
+
+        ttk.Label(detalhe_frame, text="Referência (YYYY-MM):").grid(row=1, column=0, sticky='w', pady=6)
+        self.entry_ref = ttk.Entry(detalhe_frame, width=12)
+        self.entry_ref.grid(row=1, column=1, sticky='w', pady=6)
+
+        ttk.Label(detalhe_frame, text="Parcela: ").grid(row=1, column=2, sticky='w', padx=(10,0))
+        self.lbl_parcela = ttk.Label(detalhe_frame, text="-")
+        self.lbl_parcela.grid(row=1, column=3, sticky='w')
+
+        ttk.Label(detalhe_frame, text="Nº Requisição:").grid(row=2, column=0, sticky='w', pady=6)
+        self.entry_req = ttk.Entry(detalhe_frame, width=25)
+        self.entry_req.grid(row=2, column=1, sticky='w', pady=6)
+
+        ttk.Label(detalhe_frame, text="Observações:").grid(row=3, column=0, sticky='nw')
+        self.text_obs = tk.Text(detalhe_frame, width=60, height=4)
+        self.text_obs.grid(row=3, column=1, columnspan=3, sticky='w', pady=6)
+
+        btn_frame = ttk.Frame(detalhe_frame)
+        btn_frame.grid(row=4, column=1, columnspan=3, pady=6, sticky='w')
+        ttk.Button(btn_frame, text="Preencher mês atual", command=self.preencher_mes_atual).pack(side='left', padx=4)
+        ttk.Button(btn_frame, text="Registrar requisição", command=self.registrar_requisicao).pack(side='left', padx=4)
+        ttk.Button(btn_frame, text="Exportar CSV", command=self.exportar_acompanhamento_csv).pack(side='left', padx=4)
+
+        self.carregar_editais_para_combo()  # garante combos atualizados
+        self.carregar_acompanhamento_lista()
+
+    def referencia_mes_atual(self):
+        hoje = datetime.now()
+        return f"{hoje.year:04d}-{hoje.month:02d}"
+
+    def calcular_parcela_para_referencia(self, data_inicio_bolsa_iso, referencia_yyyy_mm):
+        try:
+            inicio = datetime.strptime(data_inicio_bolsa_iso, "%Y-%m-%d")
+            ref = datetime.strptime(referencia_yyyy_mm + "-01", "%Y-%m-%d")
+            meses = (ref.year - inicio.year) * 12 + (ref.month - inicio.month)
+            return meses + 1 if meses >= 0 else 0
+        except Exception:
+            return None
+
+    def carregar_acompanhamento_lista(self):
+        for item in self.tree_acomp.get_children():
+            self.tree_acomp.delete(item)
+
+        edital_filter = None
+        try:
+            val = self.combo_acomp_editais.get()
+            if val and val != "Todos":
+                edital_filter = val
+        except Exception:
+            edital_filter = None
+
+        try:
+            conn = sqlite3.connect(self.db_path)
+            cursor = conn.cursor()
+            if edital_filter:
+                cursor.execute('''
+                    SELECT bolsistas.id, bolsistas.nome, bolsistas.nivel, bolsistas.data_inicio_bolsa,
+                           bolsistas.meses_duracao, bolsistas.data_fim_bolsa
+                    FROM bolsistas
+                    JOIN editais ON bolsistas.edital_id = editais.id
+                    WHERE bolsistas.status = 'ativo' AND editais.numero_edital = ?
+                    ORDER BY bolsistas.nome
+                ''', (edital_filter,))
+            else:
+                cursor.execute('''
+                    SELECT id, nome, nivel, data_inicio_bolsa, meses_duracao, data_fim_bolsa
+                    FROM bolsistas
+                    WHERE status = 'ativo'
+                    ORDER BY nome
+                ''')
+            rows = cursor.fetchall()
+            conn.close()
+
+            ref = self.referencia_mes_atual()
+            for r in rows:
+                parcela = self.calcular_parcela_para_referencia(r[3], ref)
+                parcela_display = str(parcela) if parcela and parcela > 0 else "-"
+                self.tree_acomp.insert("", "end", values=(r[0], r[1], r[2], self.converter_data_iso_para_br(r[3]), parcela_display, r[4], self.converter_data_iso_para_br(r[5])))
+        except sqlite3.Error as e:
+            messagebox.showerror("Erro", f"Erro ao carregar acompanhamento:\n{str(e)}")
+
+    def mostrar_detalhes_acompanhamento(self, event=None):
+        sel = self.tree_acomp.selection()
+        if not sel:
+            return
+        item = self.tree_acomp.item(sel)
+        vals = item['values']
+        bolsista_id = vals[0]
+        nome = vals[1]
+
+        self.lbl_bolsista_sel.config(text=f"{nome} (ID {bolsista_id})")
+        ref = self.referencia_mes_atual()
+        self.entry_ref.delete(0, tk.END)
+        self.entry_ref.insert(0, ref)
+
+        # calcular parcela
+        data_inicio_iso = None
+        try:
+            conn = sqlite3.connect(self.db_path)
+            cursor = conn.cursor()
+            cursor.execute("SELECT data_inicio_bolsa FROM bolsistas WHERE id = ?", (bolsista_id,))
+            row = cursor.fetchone()
+            conn.close()
+            data_inicio_iso = row[0] if row else None
+        except sqlite3.Error:
+            data_inicio_iso = None
+
+        parcela = self.calcular_parcela_para_referencia(data_inicio_iso, ref) if data_inicio_iso else None
+        self.lbl_parcela.config(text=str(parcela) if parcela and parcela > 0 else "-")
+
+        # carregar registro existente
+        try:
+            conn = sqlite3.connect(self.db_path)
+            cursor = conn.cursor()
+            cursor.execute('''
+                SELECT requisicao_pagamento, observacoes FROM acompanhamento
+                WHERE bolsista_id = ? AND referencia_mes = ?
+            ''', (bolsista_id, ref))
+            rec = cursor.fetchone()
+            conn.close()
+            self.entry_req.delete(0, tk.END)
+            self.text_obs.delete('1.0', tk.END)
+            if rec:
+                if rec[0]: self.entry_req.insert(0, rec[0])
+                if rec[1]: self.text_obs.insert('1.0', rec[1])
+        except sqlite3.Error:
+            pass
+
+    def preencher_mes_atual(self):
+        sel = self.tree_acomp.selection()
+        if not sel:
+            messagebox.showwarning("Aviso", "Selecione um bolsista primeiro.")
+            return
+        item = self.tree_acomp.item(sel)
+        vals = item['values']
+        bolsista_id = vals[0]
+        ref = self.referencia_mes_atual()
+        self.entry_ref.delete(0, tk.END)
+        self.entry_ref.insert(0, ref)
+        # mostra detalhes (vai preencher parcela e possíveis registros existentes)
+        self.mostrar_detalhes_acompanhamento()
+
+    def registrar_requisicao(self):
+        sel = self.tree_acomp.selection()
+        if not sel:
+            messagebox.showwarning("Aviso", "Selecione um bolsista primeiro.")
+            return
+        item = self.tree_acomp.item(sel)
+        bolsista_id = item['values'][0]
+        ref = self.entry_ref.get().strip()
+        try:
+            parcela = int(self.lbl_parcela.cget("text"))
+        except Exception:
+            parcela = None
+        requisicao = self.entry_req.get().strip() or None
+        observ = self.text_obs.get('1.0', tk.END).strip() or None
+
+        if not ref:
+            messagebox.showerror("Erro", "Referência inválida.")
+            return
+
+        try:
+            db.registrar_acompanhamento(bolsista_id, ref, parcela, requisicao, observ)
+            messagebox.showinfo("Sucesso", "Requisição registrada com sucesso.")
+            self.carregar_acompanhamento_lista()
+        except sqlite3.Error as e:
+            messagebox.showerror("Erro de Banco de Dados", f"Erro ao salvar acompanhamento:\n{str(e)}")
+
+    def exportar_acompanhamento_csv(self):
+        """Exporta registros de acompanhamento para CSV."""
+        try:
+            rows = db.obter_acompanhamento_para_csv()
+
+            if not rows:
+                messagebox.showinfo("Info", "Nenhum registro de acompanhamento para exportar.")
+                return
+
+            pasta = filedialog.askdirectory(title="Escolha a pasta para salvar o CSV")
+            if not pasta:
+                return
+
+            caminho = os.path.join(pasta, "acompanhamento_exportado.csv")
+            with open(caminho, 'w', newline='', encoding='utf-8') as f:
+                writer = csv.writer(f, delimiter=';')
+                writer.writerow(['ID', 'Bolsista', 'CPF', 'Nível', 'Referência (Mês)', 'Parcela', 'Nº Requisição', 'Observações', 'Criado em'])
+                for row in rows:
+                    writer.writerow(row)
+
+            messagebox.showinfo("Sucesso", f"Acompanhamento exportado para:\n{caminho}")
+        except Exception as e:
+            messagebox.showerror("Erro", f"Erro ao exportar acompanhamento:\n{str(e)}")
 
     def carregar_dados_consulta(self, event=None):
         for item in self.tree_editais.get_children():
