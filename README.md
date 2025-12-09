@@ -4,6 +4,8 @@ Sistema desktop para gestão de editais de bolsas de estudo (CAPES, CNPq, Funda�
 
 ![Tema Dark](https://img.shields.io/badge/Tema-Dark-2d2d2d?style=flat)
 ![Python](https://img.shields.io/badge/Python-3.8%2B-blue?style=flat)
+![SQLite](https://img.shields.io/badge/Database-SQLite3-lightgrey?style=flat)
+![Versão](https://img.shields.io/badge/Versão-3.0-brightgreen?style=flat)
 ![Licença](https://img.shields.io/github/license/seu-usuario/gestao_editais?style=flat)
 
 ## ✨ Funcionalidades
@@ -174,3 +176,52 @@ Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para de
 ## 🙌 Autor
 
 Desenvolvido por **higosantos** para a **UTFPR**.
+
+---
+
+## 📚 Documentação Completa
+
+Este projeto inclui documentação abrangente. Consulte os arquivos:
+
+| Arquivo | Descrição |
+|---------|-----------|
+| **[DOCUMENTACAO.md](DOCUMENTACAO.md)** | 📖 Guia técnico completo (arquitetura, API, DB, troubleshooting) |
+| **[GUIA_RAPIDO.md](GUIA_RAPIDO.md)** | ⚡ Quick start para usuários finais |
+| **[FAQ.md](FAQ.md)** | ❓ Perguntas frequentes com respostas |
+| **[DESENVOLVIMENTO.md](DESENVOLVIMENTO.md)** | 🛠️ Guia para contribuidores e desenvolvedores |
+| **[GUIA_EXCEL_MENSAL.md](GUIA_EXCEL_MENSAL.md)** | 📊 Exportação Excel e automação |
+
+### Começar Rápido
+
+1. **Usuário iniciante?** → Leia [GUIA_RAPIDO.md](GUIA_RAPIDO.md)
+2. **Dúvida?** → Procure em [FAQ.md](FAQ.md)
+3. **Precisa de detalhes técnicos?** → Consulte [DOCUMENTACAO.md](DOCUMENTACAO.md)
+4. **Vai contribuir com código?** → Estude [DESENVOLVIMENTO.md](DESENVOLVIMENTO.md)
+
+---
+
+## 🔄 Histórico de Versões
+
+| Versão | Data | Destaques |
+|--------|------|-----------|
+| **3.0** | Dez 2025 | ✨ Exportação Excel com formatação profissional + Task Scheduler automático |
+| **2.1** | Nov 2025 | 🐛 Correções de bugs em edição |
+| **2.0** | Out 2025 | 🏗️ Refatoração para padrão MVC + módulo db.py centralizado |
+| **1.0** | Set 2025 | 🎉 Lançamento inicial |
+
+---
+
+## 🤝 Contribuindo
+
+1. Faça um fork do projeto
+2. Crie uma branch para sua feature: `git checkout -b feature/AmazingFeature`
+3. Commit: `git commit -m 'feat: Add AmazingFeature'`
+4. Push: `git push origin feature/AmazingFeature`
+5. Abra um Pull Request
+
+Veja [DESENVOLVIMENTO.md](DESENVOLVIMENTO.md) para detalhes técnicos.
+
+---
+
+**Status**: ✅ Produção  
+**Última atualização**: Dezembro 2025
