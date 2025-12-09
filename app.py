@@ -124,7 +124,7 @@ class GestaoEditaisApp:
             messagebox.showinfo("Sucesso", "Edital cadastrado com sucesso!")
             self.limpar_campos_edital()
             self.carregar_editais_para_combo()
-               self.carregar_editais_consulta()  # Atualizar Treeview de editais
+            self.carregar_editais_consulta()  # Atualizar Treeview de editais
         except Exception as e:
             messagebox.showerror("Erro de Banco de Dados", f"Erro ao salvar edital:\n{str(e)}")
 

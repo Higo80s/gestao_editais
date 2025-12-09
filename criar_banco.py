@@ -1,7 +1,9 @@
 import sqlite3
+import os
 
 def criar_banco():
-    conn = sqlite3.connect('gestao_editais.db')
+    db_path = os.path.join(os.path.dirname(__file__), 'gestao_editais.db')
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
     # Tabela: editais
