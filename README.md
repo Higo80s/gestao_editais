@@ -109,6 +109,45 @@ python atualizar_banco_v2.py
 python atualizar_banco_v3.py
 ```
 
+### Exportação em Excel (Novo - v3)
+
+A aba **Acompanhamento** agora oferece exportação em **Excel com formatação profissional**.
+
+#### Exportar Manualmente
+
+1. Abra a aba **"Acompanhamento"**.
+2. Clique no botão **"Exportar Excel"**.
+3. Escolha a pasta onde salvar.
+4. Arquivo `acompanhamento_YYYY-MM.xlsx` é gerado com:
+   - ✅ Headers formatados (azul escuro, texto branco, negrito)
+   - ✅ Valores monetários formatados (R$ X.XXX,XX)
+   - ✅ Bordas e alinhamento profissional
+   - ✅ Colunas ajustadas automaticamente
+   - ✅ Dados do mês referência
+
+#### Automatizar Exportação Mensal
+
+Execute manualmente:
+```powershell
+python exportar_excel_mensal.py
+```
+
+Ou agende no Task Scheduler (similar ao prefill):
+
+```powershell
+$Action = New-ScheduledTaskAction -Execute "C:\...\python.exe" `
+    -Argument "C:\...\exportar_excel_mensal.py" `
+    -WorkingDirectory "C:\Users\higosantos\Documents\gestao_editais"
+
+$Trigger = New-ScheduledTaskTrigger -Monthly -At 10:00 -DaysOfMonth 1
+
+Register-ScheduledTask -TaskName "Gestão de Editais - Excel Mensal" `
+    -Action $Action -Trigger $Trigger -Description "Exporta acompanhamento em Excel" `
+    -RunLevel Highest
+```
+
+**Resultado:** Arquivo Excel gerado automaticamente no 1º do mês às 10:00 AM.
+
 ## 💻 Para desenvolvedores
 
 ### Pré-requisitos

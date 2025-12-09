@@ -291,3 +291,162 @@ def criar_modalidade(edital_id, nivel, vagas, valor_mensal):
     ''', (edital_id, nivel, vagas, valor_mensal))
     conn.commit()
     conn.close()
+
+
+# ===== EXPORTAÇÃO EXCEL (COM FORMATAÇÃO) =====
+
+def exportar_acompanhamento_para_excel(referencia_mes=None, caminho_saida=None):
+    """
+    Exporta acompanhamento para Excel com formatação profissional.
+    
+    Args:
+        referencia_mes: Filtra por mês (ex: '2026-01'). Se None, exporta tudo.
+        caminho_saida: Caminho do arquivo. Se None, salva como 'acompanhamento_YYYY-MM.xlsx'
+    
+    Returns:
+        Caminho do arquivo gerado
+    """
+    from openpyxl import Workbook
+    from openpyxl.styles import Font, Alignment, PatternFill, Border, Side
+    from openpyxl.utils import get_column_letter
+    
+    # Obter dados
+    conn = get_connection()
+    cursor = conn.cursor()
+    
+    if referencia_mes:
+        cursor.execute('''
+            SELECT 
+                e.numero_edital as 'Edital',
+                b.processo_sei as 'SEI',
+                b.cpf as 'CPF',
+                b.nome as 'Nome',
+                b.programa as 'Programa',
+                b.campus as 'Campus',
+                b.nivel as 'Nível',
+                m.valor_mensal as 'Valor',
+                b.data_inicio_bolsa as 'Início da Bolsa',
+                a.referencia_mes as 'Referência',
+                a.parcela as 'Parcela',
+                a.requisicao_pagamento as 'Requisição',
+                a.observacoes as 'Observações',
+                a.criado_em as 'Data Criação'
+            FROM acompanhamento a
+            JOIN bolsistas b ON a.bolsista_id = b.id
+            JOIN editais e ON b.edital_id = e.id
+            LEFT JOIN modalidades m ON e.id = m.edital_id AND b.nivel = m.nivel
+            WHERE a.referencia_mes = ?
+            ORDER BY b.nome
+        ''', (referencia_mes,))
+    else:
+        cursor.execute('''
+            SELECT 
+                e.numero_edital as 'Edital',
+                b.processo_sei as 'SEI',
+                b.cpf as 'CPF',
+                b.nome as 'Nome',
+                b.programa as 'Programa',
+                b.campus as 'Campus',
+                b.nivel as 'Nível',
+                m.valor_mensal as 'Valor',
+                b.data_inicio_bolsa as 'Início da Bolsa',
+                a.referencia_mes as 'Referência',
+                a.parcela as 'Parcela',
+                a.requisicao_pagamento as 'Requisição',
+                a.observacoes as 'Observações',
+                a.criado_em as 'Data Criação'
+            FROM acompanhamento a
+            JOIN bolsistas b ON a.bolsista_id = b.id
+            JOIN editais e ON b.edital_id = e.id
+            LEFT JOIN modalidades m ON e.id = m.edital_id AND b.nivel = m.nivel
+            ORDER BY a.referencia_mes DESC, b.nome
+        ''')
+    
+    dados = cursor.fetchall()
+    conn.close()
+    
+    if not dados:
+        return None
+    
+    # Criar workbook
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Acompanhamento"
+    
+    # Definir colunas (headers da query acima)
+    headers = ['Edital', 'SEI', 'CPF', 'Nome', 'Programa', 'Campus', 'Nível', 
+               'Valor', 'Início da Bolsa', 'Referência', 'Parcela', 'Requisição', 'Observações', 'Data Criação']
+    
+    # Escrever headers
+    for col_num, header in enumerate(headers, 1):
+        cell = ws.cell(row=1, column=col_num)
+        cell.value = header
+        cell.font = Font(bold=True, color="FFFFFF", size=11)
+        cell.fill = PatternFill(start_color="366092", end_color="366092", fill_type="solid")
+        cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+    
+    # Escrever dados
+    thin_border = Border(
+        left=Side(style='thin'),
+        right=Side(style='thin'),
+        top=Side(style='thin'),
+        bottom=Side(style='thin')
+    )
+    
+    for row_num, row_data in enumerate(dados, 2):
+        for col_num, value in enumerate(row_data, 1):
+            cell = ws.cell(row=row_num, column=col_num)
+            cell.value = value
+            cell.border = thin_border
+            cell.alignment = Alignment(horizontal="left", vertical="center", wrap_text=True)
+            
+            # Formatar valores monetários
+            if col_num == 8:  # Coluna Valor
+                if value:
+                    cell.value = f"R$ {value:,.2f}".replace(',', '.')
+                    cell.alignment = Alignment(horizontal="right", vertical="center")
+    
+    # Ajustar largura das colunas
+    for col_num, header in enumerate(headers, 1):
+        col_letter = get_column_letter(col_num)
+        if header in ['Nome', 'Programa', 'Observações']:
+            ws.column_dimensions[col_letter].width = 25
+        elif header in ['Requisição']:
+            ws.column_dimensions[col_letter].width = 15
+        else:
+            ws.column_dimensions[col_letter].width = 12
+    
+    # Definir altura das linhas
+    ws.row_dimensions[1].height = 25
+    for row_num in range(2, len(dados) + 2):
+        ws.row_dimensions[row_num].height = 20
+    
+    # Salvar arquivo
+    if caminho_saida is None:
+        ref = referencia_mes if referencia_mes else f"{datetime.now().year:04d}-{datetime.now().month:02d}"
+        caminho_saida = os.path.join(os.path.dirname(__file__), f"acompanhamento_{ref}.xlsx")
+    
+    wb.save(caminho_saida)
+    return caminho_saida
+
+
+def exportar_acompanhamento_mensal_automatico():
+    """
+    Exporta acompanhamento do mês atual para Excel automaticamente.
+    Útil para ser chamado pelo agendador (Task Scheduler).
+    
+    Returns:
+        Tupla: (caminho_arquivo, mes_referencia, quantidade_registros)
+    """
+    ref = f"{datetime.now().year:04d}-{datetime.now().month:02d}"
+    caminho = exportar_acompanhamento_para_excel(referencia_mes=ref)
+    
+    if caminho:
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute('SELECT COUNT(*) FROM acompanhamento WHERE referencia_mes = ?', (ref,))
+        count = cursor.fetchone()[0]
+        conn.close()
+        return caminho, ref, count
+    
+    return None, ref, 0

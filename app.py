@@ -685,6 +685,7 @@ class GestaoEditaisApp:
         ttk.Button(btn_frame, text="Preencher mês atual", command=self.preencher_mes_atual).pack(side='left', padx=4)
         ttk.Button(btn_frame, text="Registrar requisição", command=self.registrar_requisicao).pack(side='left', padx=4)
         ttk.Button(btn_frame, text="Exportar CSV", command=self.exportar_acompanhamento_csv).pack(side='left', padx=4)
+        ttk.Button(btn_frame, text="Exportar Excel", command=self.exportar_acompanhamento_excel).pack(side='left', padx=4)
 
         self.carregar_editais_para_combo()  # garante combos atualizados
         self.carregar_acompanhamento_lista()
@@ -854,6 +855,26 @@ class GestaoEditaisApp:
             messagebox.showinfo("Sucesso", f"Acompanhamento exportado para:\n{caminho}")
         except Exception as e:
             messagebox.showerror("Erro", f"Erro ao exportar acompanhamento:\n{str(e)}")
+
+    def exportar_acompanhamento_excel(self):
+        """Exporta registros de acompanhamento para Excel com formatação profissional."""
+        try:
+            pasta = filedialog.askdirectory(title="Escolha a pasta para salvar o Excel")
+            if not pasta:
+                return
+
+            ref = self.referencia_mes_atual()
+            caminho = os.path.join(pasta, f"acompanhamento_{ref}.xlsx")
+            
+            # Chama função do db.py
+            resultado = db.exportar_acompanhamento_para_excel(referencia_mes=ref, caminho_saida=caminho)
+            
+            if resultado:
+                messagebox.showinfo("Sucesso", f"Acompanhamento exportado para:\n{resultado}")
+            else:
+                messagebox.showinfo("Info", f"Nenhum registro para o mês {ref}.")
+        except Exception as e:
+            messagebox.showerror("Erro", f"Erro ao exportar Excel:\n{str(e)}")
 
     def carregar_dados_consulta(self, event=None):
         for item in self.tree_editais.get_children():
