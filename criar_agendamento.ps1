@@ -1,4 +1,4 @@
-# Script PowerShell para criar agendamento automatico
+    # Script PowerShell para criar agendamento automatico
 # Execute como Administrador: Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process; .\criar_agendamento.ps1
 
 $pythonPath = "C:\Python313\python.exe"
