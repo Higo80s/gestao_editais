@@ -55,6 +55,11 @@ conn = sqlite3.connect(db_path)
 - ✅ `test_save.py`
 - ✅ `test_tryagain.py`
 
+### Nota adicional
+O aplicativo agora garante o schema do banco automaticamente ao iniciar. Foi adicionada em `db.py` a função
+`ensure_db_schema()` que executa os `CREATE TABLE IF NOT EXISTS` necessários. `app.py` chama essa função
+no startup, então mesmo que o `gestao_editais.db` esteja ausente ou falte alguma tabela, o aplicativo irá
+criar as tabelas necessárias automaticamente.
 ## 🚀 Como Usar Corretamente
 
 ### 1️⃣ Criar o Banco (primeira vez)

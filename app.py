@@ -27,6 +27,13 @@ class GestaoEditaisApp:
 
         self.db_path = os.path.join(os.path.dirname(__file__), 'gestao_editais.db')
 
+        # Garantir que o schema do banco exista (cria tabelas se necessário)
+        try:
+            db.ensure_db_schema()
+        except Exception as e:
+            messagebox.showerror("Erro de Banco de Dados", f"Erro ao inicializar o banco de dados:\n{e}")
+            # continuar mesmo em caso de erro para permitir debug manual
+
         self.notebook = ttk.Notebook(root)
         self.notebook.pack(fill='both', expand=True, padx=10, pady=10)
 
