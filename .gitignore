@@ -1,0 +1,18 @@
+# Pastas do PyInstaller
+build/
+dist/
+*.spec
+
+# Ambiente virtual
+.venv/
+venv/
+env/
+
+# Arquivos do sistema
+Thumbs.db
+.DS_Store
+*.log
+
+# Banco de dados (opcional: você pode querer versionar um db vazio)
+# Se quiser manter o db no GitHub, comente a linha abaixo:
+# gestao_editais.db
