@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="topbar">
+    <h1>Editais</h1>
+    <a href="{{ url_for('editais_novo') }}" class="btn btn-primary">Novo Edital</a>
+</div>
+
+<div class="card">
+    <table class="table" style="width: 100%; border-collapse: collapse;">
+        <thead>
+            <tr style="text-align: left; border-bottom: 2px solid #e5e7eb;">
+                <th style="padding: 1rem;">Número</th>
+                <th style="padding: 1rem;">Descrição</th>
+                <th style="padding: 1rem;">Agência</th>
+                <th style="padding: 1rem;">Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for edital in editais %}
+            <tr style="border-bottom: 1px solid #e5e7eb;">
+                <td style="padding: 1rem;">{{ edital.numero }}</td>
+                <td style="padding: 1rem;">{{ edital.descricao }}</td>
+                <td style="padding: 1rem;">{{ edital.agencia }}</td>
+                <td style="padding: 1rem;">
+                    <a href="{{ url_for('modalidades_gerenciar', id=edital.id) }}"
+                        style="color: var(--secondary-color); text-decoration: none; font-weight: 500; margin-right: 10px;">Bolsas</a>
+                    <a href="{{ url_for('editais_editar', id=edital.id) }}"
+                        style="color: var(--primary-color); text-decoration: none; font-weight: 500; margin-right: 10px;">Editar</a>
+                    <form action="{{ url_for('editais_excluir', id=edital.id) }}" method="POST"
+                        style="display: inline;">
+                        <button type="submit" onclick="return confirm('Tem certeza?')"
+                            style="background: none; border: none; color: var(--danger-color); cursor: pointer; font-weight: 500;">Excluir</button>
+                    </form>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="4" style="padding: 2rem; text-align: center; color: var(--text-muted);">Nenhum edital
+                    cadastrado.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

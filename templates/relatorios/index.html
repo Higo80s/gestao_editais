@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="topbar">
+    <h1>Relatórios</h1>
+</div>
+
+<div class="card" style="max-width: 600px;">
+    <h3>Relatório de Pagamento Mensal</h3>
+    <form action="{{ url_for('relatorios_gerar') }}" method="POST">
+        <div style="margin-bottom: 1rem;">
+            <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Mês de Referência</label>
+            <input type="month" name="mes" required
+                style="width: 100%; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 0.375rem;">
+        </div>
+
+        <div style="margin-bottom: 1rem;">
+            <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Formato</label>
+            <select name="tipo"
+                style="width: 100%; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 0.375rem;">
+                <option value="excel">Excel (.xlsx)</option>
+                <option value="pdf">PDF (.pdf)</option>
+            </select>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%;">Gerar Relatório</button>
+    </form>
+</div>
+{% endblock %}

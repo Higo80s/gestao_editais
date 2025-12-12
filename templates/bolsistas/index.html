@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="topbar">
+    <h1>Bolsistas</h1>
+    <a href="{{ url_for('bolsistas_novo') }}" class="btn btn-primary">Novo Bolsista</a>
+</div>
+
+<div class="card">
+    <table class="table" style="width: 100%; border-collapse: collapse;">
+        <thead>
+            <tr style="text-align: left; border-bottom: 2px solid #e5e7eb;">
+                <th style="padding: 1rem;">Nome</th>
+                <th style="padding: 1rem;">Nível</th>
+                <th style="padding: 1rem;">Edital</th>
+                <th style="padding: 1rem;">Vigência</th>
+                <th style="padding: 1rem;">Status</th>
+                <th style="padding: 1rem;">Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for bolsista in bolsistas %}
+            <tr style="border-bottom: 1px solid #e5e7eb;">
+                <td style="padding: 1rem;">{{ bolsista.nome }}</td>
+                <td style="padding: 1rem;">{{ bolsista.modalidade.nivel }}</td>
+                <td style="padding: 1rem;">{{ bolsista.edital.numero }}</td>
+                <td style="padding: 1rem;">{{ bolsista.data_inicio_bolsa }} a {{ bolsista.data_fim_bolsa }}</td>
+                <td style="padding: 1rem;">
+                    <span
+                        style="padding: 0.25rem 0.5rem; border-radius: 99px; font-size: 0.8rem; background: {{ '#d1fae5' if bolsista.ativo else '#fee2e2' }}; color: {{ '#065f46' if bolsista.ativo else '#991b1b' }};">
+                        {{ 'Ativo' if bolsista.ativo else 'Desligado' }}
+                    </span>
+                </td>
+                <td style="padding: 1rem; display: flex; gap: 10px;">
+                    <a href="{{ url_for('bolsistas_editar', id=bolsista.id) }}" style="color: var(--primary-color);">Editar</a>
+                    <form action="{{ url_for('bolsistas_excluir', id=bolsista.id) }}" method="POST" onsubmit="return confirm('Tem certeza que deseja excluir?');">
+                        <button type="submit" style="background: none; border: none; color: #ef4444; cursor: pointer;">Excluir</button>
+                    </form>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="6" style="padding: 2rem; text-align: center; color: var(--text-muted);">Nenhum bolsista
+                    cadastrado.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

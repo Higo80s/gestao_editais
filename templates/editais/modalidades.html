@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="topbar">
+    <h1>Modalidades do Edital {{ edital.numero }}</h1>
+    <a href="{{ url_for('editais_index') }}" class="btn" style="background-color: #e5e7eb;">Voltar</a>
+</div>
+
+<div class="card-grid">
+    <!-- Form -->
+    <div class="card">
+        <h3>Nova Modalidade</h3>
+        <form method="POST">
+            <div style="margin-bottom: 1rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Nível</label>
+                <select name="nivel" required
+                    style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem;">
+                    <option value="Graduação">Graduação</option>
+                    <option value="Mestrado">Mestrado</option>
+                    <option value="Doutorado">Doutorado</option>
+                    <option value="Pós-Doutorado">Pós-Doutorado</option>
+                </select>
+            </div>
+            <div style="margin-bottom: 1rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Vagas</label>
+                <input type="number" name="vagas" required
+                    style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem;">
+            </div>
+            <div style="margin-bottom: 1rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Valor Mensal (R$)</label>
+                <input type="text" name="valor_mensal" required placeholder="0.00"
+                    style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem;">
+            </div>
+            <button type="submit" class="btn btn-primary" style="width: 100%;">Adicionar</button>
+        </form>
+    </div>
+
+    <!-- List -->
+    <div class="card" style="grid-column: span 2;">
+        <h3>Modalidades Cadastradas</h3>
+        <table class="table" style="width: 100%; border-collapse: collapse; margin-top: 1rem;">
+            <thead>
+                <tr style="text-align: left; border-bottom: 2px solid #e5e7eb;">
+                    <th style="padding: 0.5rem;">Nível</th>
+                    <th style="padding: 0.5rem;">Vagas</th>
+                    <th style="padding: 0.5rem;">Valor</th>
+                    <th style="padding: 0.5rem;">Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for mod in edital.modalidades %}
+                <tr style="border-bottom: 1px solid #e5e7eb;">
+                    <td style="padding: 0.5rem;">{{ mod.nivel }}</td>
+                    <td style="padding: 0.5rem;">{{ mod.vagas }}</td>
+                    <td style="padding: 0.5rem;">R$ {{ "%.2f"|format(mod.valor_mensal) }}</td>
+                    <td style="padding: 0.5rem;">
+                        <form action="{{ url_for('modalidades_excluir', id=mod.id) }}" method="POST">
+                            <button type="submit"
+                                style="color: var(--danger-color); background: none; border: none; cursor: pointer;">Excluir</button>
+                        </form>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="4" style="padding: 1rem; text-align: center;">Nenhuma modalidade cadastrada.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

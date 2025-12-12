@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="topbar">
+    <h1>{{ 'Editar' if edital else 'Novo' }} Edital</h1>
+    <a href="{{ url_for('editais_index') }}" class="btn" style="background-color: #e5e7eb;">Voltar</a>
+</div>
+
+<div class="card" style="max-width: 800px;">
+    <form method="POST">
+        <div style="margin-bottom: 1rem;">
+            <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Número do Edital</label>
+            <input type="text" name="numero" value="{{ edital.numero if edital else '' }}" required
+                style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem;">
+        </div>
+
+        <div style="margin-bottom: 1rem;">
+            <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Descrição</label>
+            <input type="text" name="descricao" value="{{ edital.descricao if edital else '' }}"
+                style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem;">
+        </div>
+
+        <div style="margin-bottom: 1rem;">
+            <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Agência de Fomento</label>
+            <input type="text" name="agencia" value="{{ edital.agencia if edital else '' }}" required
+                style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem;">
+        </div>
+
+        <div style="margin-bottom: 1rem;">
+            <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Código do Projeto (opcional)</label>
+            <input type="text" name="codigo_projeto" value="{{ edital.codigo_projeto if edital else '' }}"
+                style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem;">
+        </div>
+
+        <div style="margin-bottom: 1rem;">
+            <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Descrição do Projeto
+                (opcional)</label>
+            <textarea name="descricao_projeto" rows="3"
+                style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem;">{{ edital.descricao_projeto if edital else '' }}</textarea>
+        </div>
+
+        <div style="margin-top: 2rem;">
+            <button type="submit" class="btn btn-primary">Salvar</button>
+        </div>
+    </form>
+</div>
+{% endblock %}
