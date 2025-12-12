@@ -6,7 +6,7 @@ from datetime import datetime
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///gestao_editais_new.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SECRET_KEY'] = 'dev-secret-key' # Change for production
+app.config['SECRET_KEY'] = os.urandom(24) # Production random key
 
 db.init_app(app)
 
@@ -223,4 +223,4 @@ def relatorios_gerar():
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
-    app.run(debug=True)
+    app.run()
