@@ -30,8 +30,12 @@
                 <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Valor Mensal (R$)</label>
                 <input type="text" name="valor_mensal" required placeholder="0.00"
                     style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem;">
-            </div>
-            <button type="submit" class="btn btn-primary" style="width: 100%;">Adicionar</button>
+                <div style="margin-bottom: 1rem;">
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Qtd. Máxima de Meses</label>
+                    <input type="number" name="max_meses" required placeholder="Ex: 24"
+                        style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem;">
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Adicionar</button>
         </form>
     </div>
 
@@ -44,6 +48,7 @@
                     <th style="padding: 0.5rem;">Nível</th>
                     <th style="padding: 0.5rem;">Vagas</th>
                     <th style="padding: 0.5rem;">Valor</th>
+                    <th style="padding: 0.5rem;">Max Meses</th>
                     <th style="padding: 0.5rem;">Ações</th>
                 </tr>
             </thead>
@@ -53,6 +58,7 @@
                     <td style="padding: 0.5rem;">{{ mod.nivel }}</td>
                     <td style="padding: 0.5rem;">{{ mod.vagas }}</td>
                     <td style="padding: 0.5rem;">R$ {{ "%.2f"|format(mod.valor_mensal) }}</td>
+                    <td style="padding: 0.5rem;">{{ mod.max_meses if mod.max_meses else '-' }}</td>
                     <td style="padding: 0.5rem;">
                         <form action="{{ url_for('modalidades_excluir', id=mod.id) }}" method="POST">
                             <button type="submit"

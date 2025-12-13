@@ -47,7 +47,9 @@ def editais_novo():
             descricao=request.form['descricao'],
             agencia=request.form['agencia'],
             codigo_projeto=request.form['codigo_projeto'],
-            descricao_projeto=request.form['descricao_projeto']
+            descricao_projeto=request.form['descricao_projeto'],
+            processo_sei=request.form['processo_sei'], # [NEW] V2
+            comentarios=request.form['comentarios'] # [NEW] V2
         )
         db.session.add(novo_edital)
         db.session.commit()
@@ -64,6 +66,8 @@ def editais_editar(id):
         edital.agencia = request.form['agencia']
         edital.codigo_projeto = request.form['codigo_projeto']
         edital.descricao_projeto = request.form['descricao_projeto']
+        edital.processo_sei = request.form['processo_sei'] # [NEW] V2
+        edital.comentarios = request.form['comentarios'] # [NEW] V2
         db.session.commit()
         flash('Edital atualizado com sucesso!', 'success')
         return redirect(url_for('editais_index'))
@@ -86,7 +90,8 @@ def modalidades_gerenciar(id):
             edital_id=edital.id,
             nivel=request.form['nivel'],
             vagas=int(request.form['vagas']),
-            valor_mensal=float(request.form['valor_mensal'].replace(',', '.'))
+            valor_mensal=float(request.form['valor_mensal'].replace(',', '.')),
+            max_meses=int(request.form['max_meses']) # [NEW] V2
         )
         db.session.add(nova_mod)
         db.session.commit()
@@ -125,6 +130,7 @@ def bolsistas_novo():
             cpf=request.form['cpf'],
             email=request.form['email'],
             orientador=request.form['orientador'],
+            email_orientador=request.form['email_orientador'], # [NEW] V2
             campus=request.form['campus'],
             programa=request.form['programa'],
             data_inicio_curso=datetime.strptime(request.form['data_inicio_curso'], '%Y-%m-%d').date() if request.form['data_inicio_curso'] else None,
@@ -135,7 +141,9 @@ def bolsistas_novo():
             tipo_conta=request.form['tipo_conta'],
             data_inicio_bolsa=datetime.strptime(request.form['data_inicio_bolsa'], '%Y-%m-%d').date(),
             meses_duracao=int(request.form['meses_duracao']),
-            data_fim_bolsa=datetime.strptime(request.form['data_fim_bolsa'], '%Y-%m-%d').date()
+            data_fim_bolsa=datetime.strptime(request.form['data_fim_bolsa'], '%Y-%m-%d').date(),
+            processo_sei=request.form['processo_sei'], # [NEW] V2
+            comentarios=request.form['comentarios'] # [NEW] V2
         )
         db.session.add(novo_bolsista)
         db.session.commit()
@@ -159,6 +167,7 @@ def bolsistas_editar(id):
         bolsista.cpf = request.form['cpf']
         bolsista.email = request.form['email']
         bolsista.orientador = request.form['orientador']
+        bolsista.email_orientador = request.form['email_orientador'] # [NEW] V2
         bolsista.campus = request.form['campus']
         bolsista.programa = request.form['programa']
         bolsista.data_inicio_curso = datetime.strptime(request.form['data_inicio_curso'], '%Y-%m-%d').date() if request.form['data_inicio_curso'] else None
@@ -170,10 +179,11 @@ def bolsistas_editar(id):
         bolsista.data_inicio_bolsa = datetime.strptime(request.form['data_inicio_bolsa'], '%Y-%m-%d').date()
         bolsista.meses_duracao = int(request.form['meses_duracao'])
         bolsista.data_fim_bolsa = datetime.strptime(request.form['data_fim_bolsa'], '%Y-%m-%d').date()
+        bolsista.processo_sei = request.form['processo_sei'] # [NEW] V2
+        bolsista.comentarios = request.form['comentarios'] # [NEW] V2
         
-        # Status update if provided (optional, usually handled by specific actions)
-        if 'ativo' in request.form:
-             bolsista.ativo = True if request.form['ativo'] == 'on' else False
+        # Status update (Checkbox logic: present=True, absent=False)
+        bolsista.ativo = 'ativo' in request.form
 
         db.session.commit()
         flash('Bolsista atualizado com sucesso!', 'success')
@@ -196,7 +206,8 @@ def api_modalidades(edital_id):
         'id': m.id, 
         'nivel': m.nivel, 
         'valor': m.valor_mensal, 
-        'vagas': m.vagas
+        'vagas': m.vagas,
+        'max_meses': m.max_meses # [NEW] V2
     } for m in modalidades])
 
 # === RELATÓRIOS ===
@@ -205,6 +216,10 @@ from reports import gerar_relatorio_excel, gerar_relatorio_pdf
 @app.route('/relatorios')
 def relatorios_index():
     return render_template('relatorios/index.html')
+
+@app.route('/tutorial') # [NEW] V2
+def tutorial():
+    return render_template('tutorial.html')
 
 @app.route('/relatorios/gerar', methods=['POST'])
 def relatorios_gerar():

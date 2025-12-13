@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="topbar">
+    <h1>Tutorial de Uso</h1>
+</div>
+
+<div class="card" style="max-width: 800px; line-height: 1.6;">
+    <h2 style="color: var(--primary-color);">Bem-vindo ao Gestão de Editais</h2>
+    <p>Este sistema permite gerenciar editais de fomento, suas modalidades de bolsa e os bolsistas vinculados.</p>
+
+    <hr style="margin: 1.5rem 0; border: 0; border-top: 1px solid var(--border-color);">
+
+    <h3>1. Cadastrar Edital</h3>
+    <p>Vá para a aba <strong>Editais</strong> e clique em <strong>Novo Edital</strong>. Preencha os dados básicos
+        (Número, Agência, Descrição). Agora você também pode incluir o <strong>Processo SEI</strong> e
+        <strong>Comentários</strong>.</p>
+
+    <h3>2. Cadastrar Modalidades</h3>
+    <p>Após criar um edital, você verá um botão <strong>Modalidades</strong> na lista. Clique nele para definir os
+        níveis de bolsa (Mestrado, Doutorado, etc).</p>
+    <ul>
+        <li>Informe o Nível, Quantidade de Vagas e Valor Mensal.</li>
+        <li><strong>Importante:</strong> Defina o <strong>Max Meses</strong> (Prazo Máximo) para que o sistema possa
+            calcular automaticamente a duração da bolsa depois.</li>
+    </ul>
+
+    <h3>3. Cadastrar Bolsista</h3>
+    <p>Vá para a aba <strong>Bolsistas</strong> e clique em <strong>Novo Bolsista</strong>.</p>
+    <ul>
+        <li>Selecione o Edital e a Modalidade (os campos serão carregados).</li>
+        <li>Preencha os dados pessoais e acadêmicos. Agora você pode selecionar o <strong>Campus</strong> de uma lista e
+            incluir o <strong>Email do Orientador</strong>.</li>
+        <li><strong>Cálculo Automático:</strong> Ao preencher a "Data de Início do Curso" e "Início da Bolsa", o sistema
+            calculará automaticamente a duração permitida com base no prazo da modalidade. Se ultrapassar, você verá um
+            aviso.</li>
+        <li><strong>Desligamento:</strong> Para desligar um bolsista, edite-o e desmarque a caixa <strong>Bolsista
+                Ativo</strong> no topo do formulário.</li>
+    </ul>
+
+    <h3>4. Gerar Relatórios</h3>
+    <p>Na aba <strong>Relatórios</strong>, selecione o mês/ano de referência e o formato (Excel ou PDF) para gerar a
+        folha de pagamento.</p>
+</div>
+{% endblock %}

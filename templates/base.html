@@ -30,9 +30,26 @@
             </div>
             <ul class="nav-links">
                 <li><a href="{{ url_for('index') }}" class="active">Dashboard</a></li>
-                <li><a href="{{ url_for('editais_index') }}">Editais</a></li>
-                <li><a href="{{ url_for('bolsistas_index') }}">Bolsistas</a></li>
-                <li><a href="{{ url_for('relatorios_index') }}">Relatórios</a></li>
+                <li>
+                    <a href="{{ url_for('editais_index') }}" class="nav-link">
+                        <span class="icon">📄</span> Editais
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ url_for('bolsistas_index') }}" class="nav-link">
+                        <span class="icon">🎓</span> Bolsistas
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ url_for('relatorios_index') }}" class="nav-link">
+                        <span class="icon">📊</span> Relatórios
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ url_for('tutorial') }}" class="nav-link">
+                        <span class="icon">❓</span> Tutorial
+                    </a>
+                </li>
             </ul>
         </nav>
 

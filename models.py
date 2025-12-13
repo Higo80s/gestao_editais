@@ -10,6 +10,8 @@ class Edital(db.Model):
     agencia = db.Column(db.String(50), nullable=False)
     codigo_projeto = db.Column(db.String(50))
     descricao_projeto = db.Column(db.Text)
+    processo_sei = db.Column(db.String(50)) # [NEW] V2
+    comentarios = db.Column(db.Text) # [NEW] V2
     modalidades = db.relationship('Modalidade', backref='edital', cascade='all, delete-orphan', lazy=True)
     bolsistas = db.relationship('Bolsista', backref='edital', cascade='all, delete-orphan', lazy=True)
 
@@ -19,6 +21,7 @@ class Modalidade(db.Model):
     nivel = db.Column(db.String(50), nullable=False)
     vagas = db.Column(db.Integer, nullable=False)
     valor_mensal = db.Column(db.Float, nullable=False)
+    max_meses = db.Column(db.Integer) # [NEW] V2
     bolsistas = db.relationship('Bolsista', backref='modalidade', lazy=True)
 
 class Bolsista(db.Model):
@@ -31,6 +34,7 @@ class Bolsista(db.Model):
     
     # Academic Info
     orientador = db.Column(db.String(100))
+    email_orientador = db.Column(db.String(100)) # [NEW] V2
     campus = db.Column(db.String(50))
     programa = db.Column(db.String(100))
     data_inicio_curso = db.Column(db.Date)
@@ -43,6 +47,8 @@ class Bolsista(db.Model):
     tipo_conta = db.Column(db.String(20)) # corrente/poupanca
 
     # Scholarship Info
+    processo_sei = db.Column(db.String(50)) # [NEW] V2
+    comentarios = db.Column(db.Text) # [NEW] V2
     data_inicio_bolsa = db.Column(db.Date, nullable=False)
     meses_duracao = db.Column(db.Integer, nullable=False)
     data_fim_bolsa = db.Column(db.Date, nullable=False)

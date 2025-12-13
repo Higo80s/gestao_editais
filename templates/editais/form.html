@@ -33,10 +33,23 @@
         </div>
 
         <div style="margin-bottom: 1rem;">
+            <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Processo SEI</label>
+            <input type="text" name="processo_sei"
+                value="{{ edital.processo_sei if edital and edital.processo_sei else '' }}"
+                style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem;">
+        </div>
+
+        <div style="margin-bottom: 1rem;">
             <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Descrição do Projeto
                 (opcional)</label>
             <textarea name="descricao_projeto" rows="3"
                 style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem;">{{ edital.descricao_projeto if edital else '' }}</textarea>
+        </div>
+
+        <div style="margin-bottom: 1rem;">
+            <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Comentários</label>
+            <textarea name="comentarios" rows="3"
+                style="width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem;">{{ edital.comentarios if edital and edital.comentarios else '' }}</textarea>
         </div>
 
         <div style="margin-top: 2rem;">

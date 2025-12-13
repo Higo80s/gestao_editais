@@ -8,7 +8,8 @@
 
 <form method="POST" class="card" style="max-width: 900px;">
     {% if bolsista %}
-    <div style="margin-bottom: 1.5rem; padding: 1rem; background-color: #f3f4f6; border-radius: 0.375rem;">
+    <div
+        style="margin-bottom: 1.5rem; padding: 1rem; background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 0.375rem; color: var(--text-color);">
         <label style="display:flex; align-items:center;">
             <input type="checkbox" name="ativo" style="margin-right: 0.5rem;" {% if bolsista.ativo %}checked{% endif %}>
             <strong>Bolsista Ativo</strong>
@@ -70,13 +71,31 @@
         </div>
         <div>
             <label style="display: block; margin-bottom: 0.5rem;">Campus</label>
-            <input type="text" name="campus" value="{{ bolsista.campus if bolsista else '' }}"
-                style="width: 100%; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 0.375rem;">
+            <select name="campus" required
+                style="width: 100%; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 0.375rem; background: var(--card-bg); color: var(--text-color);">
+                <option value="">Selecione...</option>
+                {% set campi = ['Apucarana', 'Campo Mourão', 'Cornélio Procópio', 'Curitiba', 'Dois Vizinhos',
+                'Francisco Beltrão', 'Guarapuava', 'Londrina', 'Medianeira', 'Pato Branco', 'Ponta Grossa', 'Santa
+                Helena', 'Toledo'] %}
+                {% for c in campi %}
+                <option value="{{ c }}" {% if bolsista and bolsista.campus==c %}selected{% endif %}>{{ c }}</option>
+                {% endfor %}
+            </select>
         </div>
         <div style="grid-column: span 2;">
-            <label style="display: block; margin-bottom: 0.5rem;">Orientador</label>
-            <input type="text" name="orientador" value="{{ bolsista.orientador if bolsista else '' }}"
-                style="width: 100%; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 0.375rem;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div>
+                    <label style="display: block; margin-bottom: 0.5rem;">Orientador</label>
+                    <input type="text" name="orientador" value="{{ bolsista.orientador if bolsista else '' }}"
+                        style="width: 100%; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 0.375rem;">
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 0.5rem;">Email do Orientador</label>
+                    <input type="email" name="email_orientador"
+                        value="{{ bolsista.email_orientador if bolsista and bolsista.email_orientador else '' }}"
+                        style="width: 100%; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 0.375rem;">
+                </div>
+            </div>
         </div>
         <div>
             <label style="display: block; margin-bottom: 0.5rem;">Início do Curso</label>
@@ -123,7 +142,7 @@
 
     <!-- SECTION 5: BOLSA -->
     <h3 style="margin-bottom: 1rem; color: var(--primary-color);">Dados da Bolsa</h3>
-    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin-bottom: 2rem;">
+    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
         <div>
             <label style="display: block; margin-bottom: 0.5rem;">Início da Bolsa</label>
             <input type="date" name="data_inicio_bolsa" value="{{ bolsista.data_inicio_bolsa if bolsista else '' }}"
@@ -142,6 +161,19 @@
         </div>
     </div>
 
+    <div style="margin-bottom: 1rem;">
+        <label style="display: block; margin-bottom: 0.5rem;">Processo SEI</label>
+        <input type="text" name="processo_sei"
+            value="{{ bolsista.processo_sei if bolsista and bolsista.processo_sei else '' }}"
+            style="width: 100%; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 0.375rem;">
+    </div>
+
+    <div style="margin-bottom: 2rem;">
+        <label style="display: block; margin-bottom: 0.5rem;">Comentários</label>
+        <textarea name="comentarios" rows="3"
+            style="width: 100%; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 0.375rem;">{{ bolsista.comentarios if bolsista and bolsista.comentarios else '' }}</textarea>
+    </div>
+
     <button type="submit" class="btn btn-primary" style="width: 100%; padding: 1rem; font-size: 1.1rem;">
         {% if bolsista %}Atualizar Bolsista{% else %}Cadastrar Bolsista{% endif %}
     </button>
@@ -156,6 +188,18 @@
         loadModalidades(editalId);
     });
 
+    // Warning Element
+    const warningDiv = document.createElement('div');
+    warningDiv.style.color = '#7f1d1d';
+    warningDiv.style.backgroundColor = '#fecaca';
+    warningDiv.style.padding = '0.75rem';
+    warningDiv.style.borderRadius = '0.375rem';
+    warningDiv.style.marginTop = '0.5rem';
+    warningDiv.style.display = 'none';
+
+    // Insert warning after meses_duracao input's parent div
+    mesesDuracao.parentNode.appendChild(warningDiv);
+
     function loadModalidades(editalId, selectedModalidadeId = null) {
         modalidadeSelect.innerHTML = '<option value="">Carregando...</option>';
         modalidadeSelect.disabled = true;
@@ -167,7 +211,8 @@
                     modalidadeSelect.innerHTML = '<option value="">Selecione...</option>';
                     data.forEach(mod => {
                         const selected = (selectedModalidadeId && selectedModalidadeId == mod.id) ? 'selected' : '';
-                        modalidadeSelect.innerHTML += `<option value="${mod.id}" ${selected}>${mod.nivel} - R$ ${mod.valor}</option>`;
+                        // Store max_meses in data attribute
+                        modalidadeSelect.innerHTML += `<option value="${mod.id}" data-max-meses="${mod.max_meses || ''}" ${selected}>${mod.nivel} - R$ ${mod.valor}</option>`;
                     });
                     modalidadeSelect.disabled = false;
                 });
@@ -177,26 +222,71 @@
         }
     }
 
-    // Pre-load if editing
-    {% if bolsista %}
-    loadModalidades({{ bolsista.edital_id }}, {{ bolsista.modalidade_id }});
-    {% endif %}
+    // Logic: Calculate Duration based on Course Start, Scholarship Start and Max Months
+    function autoCalculateDuration() {
+        const selectedOption = modalidadeSelect.options[modalidadeSelect.selectedIndex];
+        const maxMeses = selectedOption ? parseInt(selectedOption.getAttribute('data-max-meses')) : null;
 
-    // Date Logic
-    const dataInicioCurso = document.querySelector('input[name="data_inicio_curso"]');
-    const dataInicioBolsa = document.querySelector('input[name="data_inicio_bolsa"]');
-    const mesesDuracao = document.querySelector('input[name="meses_duracao"]');
-    const dataFimBolsa = document.querySelector('input[name="data_fim_bolsa"]');
+        // Ensure both dates are present
+        if (!dataInicioCurso.value || !dataInicioBolsa.value) return;
 
-    // Warning Element
-    const warningDiv = document.createElement('div');
-    warningDiv.style.color = '#b91c1c';
-    warningDiv.style.backgroundColor = '#fecaca';
-    warningDiv.style.padding = '0.5rem';
-    warningDiv.style.borderRadius = '0.375rem';
-    warningDiv.style.marginTop = '0.5rem';
-    warningDiv.style.display = 'none';
-    warningDiv.innerHTML = '<strong>Atenção:</strong> A bolsa excede o período regular do curso (24 meses).';
+        // If no max months defined for modality, default logic (just rely on user input or existing logic)
+        if (!maxMeses) return;
+
+        const startCourse = new Date(dataInicioCurso.value);
+        const startScholarship = new Date(dataInicioBolsa.value);
+
+        // Calculate months elapsed between Course Start and Scholarship Start
+        // Formula: (Year2 - Year1) * 12 + (Month2 - Month1)
+        let monthsElapsed = (startScholarship.getFullYear() - startCourse.getFullYear()) * 12;
+        monthsElapsed -= startCourse.getMonth();
+        monthsElapsed += startScholarship.getMonth();
+
+        // If started scholarship before course (weird but possible), elapsed is 0 or negative
+        if (monthsElapsed < 0) monthsElapsed = 0;
+
+        const remainingMonths = maxMeses - monthsElapsed;
+
+        if (remainingMonths <= 0) {
+            // Warn user
+            warningDiv.innerHTML = `<strong>Atenção:</strong> O prazo regular desta modalidade (${maxMeses} meses) já foi excedido pelo tempo de curso (${monthsElapsed} meses decorridos).`;
+            warningDiv.style.display = 'block';
+            mesesDuracao.value = 0;
+        } else {
+            // Set duration to remaining
+            mesesDuracao.value = remainingMonths;
+            warningDiv.style.display = 'none';
+            // Also trigger end date calc
+            updateEndDate();
+        }
+    }
+
+    function updateEndDate() {
+        if (!dataInicioBolsa.value || !mesesDuracao.value) return;
+
+        const start = new Date(dataInicioBolsa.value);
+        const months = parseInt(mesesDuracao.value);
+
+        // Helper to add months correctly handling end-of-month logic
+        // But for simplicity: Start Date + Months - 1 Day
+        // Example: Start 01/03/2024, 12 months -> End 28/02/2025
+
+        let end = new Date(start);
+        end.setMonth(end.getMonth() + months);
+        end.setDate(end.getDate() - 1);
+
+        dataFimBolsa.value = end.toISOString().split('T')[0];
+    }
+
+    // Listeners
+    dataInicioCurso.addEventListener('change', autoCalculateDuration);
+    dataInicioBolsa.addEventListener('change', () => {
+        autoCalculateDuration();
+        updateEndDate(); // If max months logic doesn't apply, still calc end date
+    });
+    modalidadeSelect.addEventListener('change', autoCalculateDuration);
+
+    mesesDuracao.addEventListener('input', updateEndDate); // Manual override update end date
 
     // Insert after data_fim_bolsa
     dataFimBolsa.parentNode.appendChild(warningDiv);
